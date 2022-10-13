@@ -7,13 +7,41 @@ namespace Abundables
 {
     public class AbundablesWindow : EditorWindow
     {
-        private string currentBundleName;
+        private Bundle openedBundle;
+        private static AbundableData data;
 
-        [MenuItem("Abundables/Main")]
+        private const string dataPath = "Assets/Abundables/Editor/Data/AbundableData.asset";
+
+        [InitializeOnLoadMethod]
+        private static void OnLoad()
+        {
+            if(data == null)
+            {
+                data = AssetDatabase.LoadAssetAtPath<AbundableData>(dataPath);
+
+                if(data == null)
+                {
+                    data = CreateInstance<AbundableData>();
+                    AssetDatabase.CreateAsset(data, dataPath);
+                    AssetDatabase.Refresh();
+                }
+            }
+        }
+
+        [MenuItem("Abundables/Open Editor")]
         public static void ShowWindow()
         {
             var window = GetWindow<AbundablesWindow>("Abundables!");
             window.Show();
+        }
+
+        [MenuItem("Abundables/Import Existing AssetBundles")]
+        public static void ImportExistingBundles()
+        {
+            if(data != null)
+            {
+                data.ImportExistingAssetBundles();
+            }
         }
 
         private void OnGUI()
@@ -21,18 +49,14 @@ namespace Abundables
             EditorGUILayout.BeginHorizontal();
             
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.MaxWidth(150f), GUILayout.ExpandHeight(true));
-            
             DrawBundlesPanel();
-            
             EditorGUILayout.EndVertical();
             
             
             EditorGUILayout.BeginVertical(EditorStyles.helpBox, GUILayout.ExpandHeight(true));
-            
             DrawAssetsPanel();
-            
             EditorGUILayout.EndVertical();
-            
+
             EditorGUILayout.EndHorizontal();
         }
 
@@ -47,15 +71,16 @@ namespace Abundables
 
             EditorGUILayout.BeginVertical();
 
-            string[] bundleNames = AssetDatabase.GetAllAssetBundleNames();
-            foreach (string bName in bundleNames)
+            //string[] bundleNames = AssetDatabase.GetAllAssetBundleNames();
+            
+            foreach (var bundle in data.GetBundles())
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.Toggle(false, GUILayout.ExpandWidth(true));
                 
-                if (GUILayout.Button(bName))
+                if (GUILayout.Button(bundle.name))
                 {
-                    currentBundleName = bName;
+                    openedBundle = bundle;
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -66,7 +91,11 @@ namespace Abundables
             EditorGUILayout.BeginHorizontal();
 
             EditorGUILayout.Toggle(false);
-            GUILayout.Button("Build Selected");
+
+            if(GUILayout.Button("Build Selected"))
+            {
+                data.BuildBundle(openedBundle);
+            }
 
             EditorGUILayout.EndHorizontal();
 
@@ -77,18 +106,21 @@ namespace Abundables
         {
             GUILayout.Label("Assets");
 
+            if(openedBundle == null)
+            {
+                return;
+            }
+
             EditorGUILayout.BeginHorizontal();
 
-
-            string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(currentBundleName);
 
             // Addresses
             EditorGUILayout.BeginVertical(EditorStyles.helpBox,  GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Address");
-            for (int i = 0; i < assetPaths.Length; i++)
+            for (int i = 0; i < openedBundle.entries.Count; i++)
             {
-                _ = EditorGUILayout.DelayedTextField("", GUILayout.MinWidth(100f));
+                openedBundle.entries[i].address = EditorGUILayout.DelayedTextField(openedBundle.entries[i].address, GUILayout.MinWidth(100f));
             }
 
             EditorGUILayout.EndVertical();
@@ -97,10 +129,10 @@ namespace Abundables
             EditorGUILayout.BeginVertical(EditorStyles.helpBox,  GUILayout.ExpandHeight(true));
 
             GUILayout.Label("Asset Path");
-            foreach(string path in assetPaths)
+            foreach(var e in openedBundle.entries)
             {
                 EditorGUILayout.BeginHorizontal();
-                GUILayout.Label(path);
+                GUILayout.Label(e.assetPath);
                 //GUILayout.FlexibleSpace();
                 //EditorGUIUtility.
                 //EditorGUILayout.ObjectField(obj: AssetDatabase.LoadMainAssetAtPath(path), typeof(UnityEngine.Object), false);
