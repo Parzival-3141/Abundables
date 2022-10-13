@@ -1,0 +1,12 @@
+﻿@Todo: rewrite this whole ass thing.
+Needs to be simplified.
+    
+The point of this is to have an easy medium between bare AssetBundles
+and the overcomplicated Addressables. You should have decent control
+with just a few clicks.
+
+Users should be able to:
+    - Select Assets to include in a bundle
+    - Create aliases for those Assets that can be used at runtime
+    - Build selected bundles
+   
