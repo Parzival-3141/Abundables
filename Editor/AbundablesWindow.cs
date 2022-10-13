@@ -36,6 +36,11 @@ namespace Abundables
             EditorGUILayout.EndHorizontal();
         }
 
+        public void GetSelectedBundles()
+        {
+            throw new NotImplementedException();
+        }
+
         private void DrawBundlesPanel()
         {
             GUILayout.Label("Bundles");
