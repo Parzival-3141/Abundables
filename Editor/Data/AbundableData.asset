@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3944b5def040f5c47a8ea6d0ec560b5c, type: 3}
   m_Name: AbundableData
   m_EditorClassIdentifier: 
-  bundles: []
+  bundles:
+  - name: spiderlab.bundle
+    entries:
+    - assetPath: Assets/SpiderLab/Prefabs/WebLine.prefab
+      address: prefabs/webline
+    - assetPath: Assets/SpiderLab/Prefabs/WebShooterReticle.prefab
+      address: prefabs/webshooterreticle
+  - name: test
+    entries:
+    - assetPath: Assets/SpiderLab/Art/Materials
+      address: art/materials
+    - assetPath: Assets/SpiderLab/Prefabs
+      address: prefabs

@@ -94,7 +94,7 @@ namespace Abundables
 
             if(GUILayout.Button("Build Selected"))
             {
-                data.BuildBundle(openedBundle);
+                AbundablesBuilder.BuildBundle(openedBundle);
             }
 
             EditorGUILayout.EndHorizontal();
