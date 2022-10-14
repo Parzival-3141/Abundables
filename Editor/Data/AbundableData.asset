@@ -16,12 +16,6 @@ MonoBehaviour:
   - name: spiderlab.bundle
     entries:
     - assetPath: Assets/SpiderLab/Prefabs/WebLine.prefab
-      address: prefabs/webline
+      address: Assets/SpiderLab/Prefabs/WebLine.prefab
     - assetPath: Assets/SpiderLab/Prefabs/WebShooterReticle.prefab
-      address: prefabs/webshooterreticle
-  - name: test
-    entries:
-    - assetPath: Assets/SpiderLab/Art/Materials
-      address: art/materials
-    - assetPath: Assets/SpiderLab/Prefabs
-      address: prefabs
+      address: Assets/SpiderLab/Prefabs/WebShooterReticle.prefab
