@@ -78,13 +78,10 @@ namespace Abundables
             GUILayout.BeginArea(bpRect, FullEditorStyles.Toolbar);
 
             #region Toolbar
-            //GUILayout.BeginArea(new Rect(0f, 0f, bpRect.width, toolbarHeight), FullEditorStyles.Toolbar);
 
             EditorGUI.DropdownButton(new Rect(0f, 0f, sideBtnWidth, toolbarHeight), EditorGUIUtility.TrIconContent("d_Toolbar Plus", "Create new Bundle"), FocusType.Passive, FullEditorStyles.Toolbarbutton);
             EditorGUI.LabelField(new Rect(sideBtnWidth, 0f, bpRect.width - sideBtnWidth, toolbarHeight), "Bundles", FullEditorStyles.Toolbarbutton.CenterText());
 
-
-            //GUILayout.EndArea();
             #endregion
 
             #region List
@@ -222,9 +219,10 @@ namespace Abundables
             for (int i = 0; i < openedBundle.entries.Count; i++)
             {
                 var entry = openedBundle.entries[i];
-                entry.address = EditorGUI.DelayedTextField(new Rect(0f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), entry.address);
+                entry.address = EditorGUI.DelayedTextField(new Rect(0f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), entry.address).ToLower();
 
                 EditorGUI.SelectableLabel(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), entry.assetPath);
+                //EditorGUI.ObjectField(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), new UnityEngine.Object(), typeof(UnityEngine.Object), false);
             }
 
 

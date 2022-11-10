@@ -64,7 +64,7 @@ namespace Abundables
             BuildPipeline.BuildAssetBundles(bundleCachePath, buildData.ToArray(),
                                             BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
 
-            EditorUserBuildSettings.SwitchActiveBuildTarget(EditorUserBuildSettings.selectedBuildTargetGroup, EditorUserBuildSettings.activeBuildTarget);
+            //EditorUserBuildSettings.SwitchActiveBuildTarget(EditorUserBuildSettings.selectedBuildTargetGroup, EditorUserBuildSettings.activeBuildTarget);
 
             for (int i = 0; i < buildData.Count; i++)
             {

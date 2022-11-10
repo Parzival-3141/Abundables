@@ -9,13 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3944b5def040f5c47a8ea6d0ec560b5c, type: 3}
+  m_Script: {fileID: 11500000, guid: b52c737f3106a244a975a84fca283dbd, type: 3}
   m_Name: AbundableData
   m_EditorClassIdentifier: 
   bundles:
   - name: spiderlab.bundle
     entries:
     - assetPath: Assets/SpiderLab/Prefabs/WebLine.prefab
-      address: Assets/SpiderLab/Prefabs/WebLine.prefab
+      address: prefabs/webline
     - assetPath: Assets/SpiderLab/Prefabs/WebShooterReticle.prefab
-      address: Assets/SpiderLab/Prefabs/WebShooterReticle.prefab
+      address: prefabs/webshooterreticle
+    - assetPath: Assets/SpiderLab/Art/Audio/webline_high.ogg
+      address: audio/webline_high
+    - assetPath: Assets/SpiderLab/Art/Audio/webline_low.ogg
+      address: audio/webline_low
+    - assetPath: Assets/SpiderLab/Art/Audio/webshot_high.ogg
+      address: audio/webshot_high
+    - assetPath: Assets/SpiderLab/Art/Audio/webshot_low.ogg
+      address: audio/webshot_low
