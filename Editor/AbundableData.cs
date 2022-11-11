@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Abundables
 {
     public class AbundableData : ScriptableObject
     {
-        public List<Bundle> bundles = new();
-
-        public Bundle[] GetBundles() 
-        {
-            return bundles.ToArray();
-        }
+        public List<Bundle> bundles = new List<Bundle>();
 
         public void ImportExistingAssetBundles()
         {
@@ -28,15 +24,14 @@ namespace Abundables
 
                 string[] paths = AssetDatabase.GetAssetPathsFromAssetBundle(bName);
 
-                var bundle = new Bundle
+                var bundle = new Bundle(bName)
                 {
-                    name = bName,
                     entries = new List<Bundle.Entry>(paths.Length)
                 };
 
                 for (int i = 0; i < paths.Length; i++)
                 {
-                    bundle.entries.Insert(i, new Bundle.Entry { address = paths[i], assetPath = paths[i] });
+                    bundle.entries.Insert(i, new Bundle.Entry { address = paths[i], assetObject = AssetDatabase.LoadMainAssetAtPath(paths[i]) });
                 }
 
                 bundles.Add(bundle);
@@ -50,13 +45,18 @@ namespace Abundables
         public string name;
         public List<Entry> entries;
 
+        public Bundle(string name)
+        {
+            this.name = name;
+        }
+
         public string[] GetAllAssetPaths()
         {
             var result = new string[entries.Count];
 
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = entries[i].assetPath;
+                result[i] = entries[i].GetAssetPath();
             }
 
             return result;
@@ -77,8 +77,14 @@ namespace Abundables
         [Serializable]
         public class Entry
         {
-            public string assetPath;
-            public string address;
+            //public string assetPath;
+            public string address = "";
+            public Object assetObject;
+
+            public string GetAssetPath()
+            {
+                return AssetDatabase.GetAssetPath(assetObject);
+            }
         }
     }
 

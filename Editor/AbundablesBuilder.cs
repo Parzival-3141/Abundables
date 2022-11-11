@@ -31,29 +31,61 @@ namespace Abundables
             }
 
             var buildData = new List<AssetBundleBuild>(bundles.Length);
-
+            bool hadErrors = false;
             for (int i = 0; i < bundles.Length; i++)
             {
                 if (bundles[i] == null)
                 {
                     Debug.LogError($"Bundle with index '{i}' is null! Skipping...");
+                    hadErrors = true;
                     continue;
                 }
 
                 if (bundles[i].entries.Count == 0)
                 {
-                    Debug.LogWarning($"There are no assets in bundle '{bundles[i].name}', skipping...");
+                    Debug.LogWarning($"There are no Assets in Bundle '{bundles[i].name}', skipping...");
+                    hadErrors = true;
+                    continue;
+                }
+
+                var paths = new List<string>();
+                var addresses = new List<string>();
+
+                for (int j = 0; j < bundles[i].entries.Count; j++)
+                {
+                    var entry = bundles[i].entries[j];
+                    if(entry == null || entry.assetObject == null || string.IsNullOrWhiteSpace(entry.address))
+                    {
+                        Debug.LogWarning($"Invalid Asset '{j}' in Bundle '{bundles[i].name}, skipping...'");
+                        hadErrors = true;
+                        continue;
+                    }
+
+                    paths.Add(entry.GetAssetPath());
+                    addresses.Add(entry.address);
+                }
+
+                if(paths.Count < 1 || addresses.Count < 1)
+                {
+                    Debug.LogWarning($"There are no valid Assets in Bundle '{bundles[i].name}, skipping...'");
+                    hadErrors = true;
                     continue;
                 }
 
                 var b = new AssetBundleBuild
                 {
                     assetBundleName = bundles[i].name,
-                    assetNames = bundles[i].GetAllAssetPaths(),
-                    addressableNames = bundles[i].GetAllAddresses(),
+                    assetNames = paths.ToArray(),
+                    addressableNames = addresses.ToArray(),
                 };
 
                 buildData.Add(b);
+            }
+
+            if(buildData.Count < 1)
+            {
+                EditorUtility.DisplayDialog("Abundables Exporter", "Error: No valid Bundles to build!\nAborting, see Console for more details.", "OK");
+                return;
             }
 
             if (!Directory.Exists(bundleCachePath))
@@ -74,7 +106,10 @@ namespace Abundables
                 File.Copy(srcPath, destPath, true);
             }
 
-            EditorUtility.DisplayDialog("Abundables Exporter", "Export Successful!", "OK");
+            if(hadErrors)
+                EditorUtility.DisplayDialog("Abundables Exporter", "Export Successful, but some Bundles had problems! See Console for more details.", "OK");
+            else
+                EditorUtility.DisplayDialog("Abundables Exporter", "Export Successful!", "OK");
         }
 
     }

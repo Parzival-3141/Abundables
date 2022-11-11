@@ -18,7 +18,7 @@ namespace Abundables
         private float toolbarHeight = 20f;
         private Color lineColor = new Color(35f / 255f, 35f / 255f, 35f / 255f);
 
-        private List<bool> selectedBundles = new();
+        private List<bool> selectedBundles = new List<bool>();
 
 
         #region Window Functions
@@ -79,7 +79,15 @@ namespace Abundables
 
             #region Toolbar
 
-            EditorGUI.DropdownButton(new Rect(0f, 0f, sideBtnWidth, toolbarHeight), EditorGUIUtility.TrIconContent("d_Toolbar Plus", "Create new Bundle"), FocusType.Passive, FullEditorStyles.Toolbarbutton);
+            // Create new bundle
+            var createBundleRect = new Rect(0f, 0f, sideBtnWidth, toolbarHeight);
+            if (EditorGUI.DropdownButton(createBundleRect, EditorGUIUtility.TrIconContent("d_Toolbar Plus", "Create new Bundle"), FocusType.Passive, FullEditorStyles.Toolbarbutton))
+            {
+                PopupWindow.Show(createBundleRect, new CreateBundlePopup(ref data));
+            }
+            //if (Event.current.type == EventType.Repaint) 
+            //    createBundleRect = GUILayoutUtility.GetLastRect();
+
             EditorGUI.LabelField(new Rect(sideBtnWidth, 0f, bpRect.width - sideBtnWidth, toolbarHeight), "Bundles", FullEditorStyles.Toolbarbutton.CenterText());
 
             #endregion
@@ -95,9 +103,7 @@ namespace Abundables
                 // Use one of the GUI.Scroll funcs
                 //GUI.BeginScrollView(listRect, default(Vector2), default(Rect), false, true);
 
-
-                var bundles = data.GetBundles();
-                for (int i = 0; i < bundles.Length; i++)
+                for (int i = 0; i < data.bundles.Count; i++)
                 {
                     var yPos = toolbarHeight * i;
 
@@ -115,19 +121,31 @@ namespace Abundables
 
                     var oldCol = GUI.color;
 
-                    if(openedBundle == bundles[i])
+                    if(openedBundle == data.bundles[i])
                     {
                         GUI.color = Color.cyan;
                     }
 
-                    if(GUI.Button(new Rect(sideBtnWidth, yPos, listRect.width - sideBtnWidth, toolbarHeight), bundles[i].name, FullEditorStyles.MiniButton.CenterText()))
+                    // Bundle Select button
+                    if(GUI.Button(new Rect(sideBtnWidth, yPos, listRect.width - sideBtnWidth * 2f, toolbarHeight), data.bundles[i].name, FullEditorStyles.MiniButton.CenterText()))
                     {
-                        openedBundle = bundles[i];
+                        openedBundle = data.bundles[i];
                     }
 
                     GUI.color = oldCol;
-                }
 
+                    // Delete button
+                    if (EditorGUI.DropdownButton(new Rect(listRect.width - sideBtnWidth, yPos, sideBtnWidth, toolbarHeight),
+                    EditorGUIUtility.TrIconContent("d_Toolbar Minus", "Delete Bundle"), FocusType.Passive, FullEditorStyles.Toolbarbutton))
+                    {
+                        Undo.RecordObject(data, "Removed Bundle");
+
+                        if (openedBundle == data.bundles[i])
+                            openedBundle = null;
+
+                        data.bundles.RemoveAt(i--);
+                    }
+                }
 
                 GUILayout.EndArea();
             }
@@ -169,7 +187,7 @@ namespace Abundables
                     if (anySelected)
                     {
                         var selected = new List<Bundle>();
-                        var bundles = data.GetBundles();
+                        var bundles = data.bundles;
 
                         for (int i = 0; i < selectedBundles.Count; i++)
                         {
@@ -204,32 +222,89 @@ namespace Abundables
             //GUILayout.BeginArea(new Rect(0f, toolbarHeight, apRect.width, toolbarHeight));
 
             EditorGUI.LabelField(new Rect(0f, toolbarHeight, apRect.width / 2f, toolbarHeight), "Address", FullEditorStyles.Toolbarbutton.CenterText());
-            EditorGUI.LabelField(new Rect(apRect.width / 2f, toolbarHeight, apRect.width / 2f, toolbarHeight), "Asset Path", FullEditorStyles.Toolbarbutton.CenterText());
+            EditorGUI.LabelField(new Rect(apRect.width / 2f, toolbarHeight, apRect.width / 2f - sideBtnWidth, toolbarHeight), "Asset Path", FullEditorStyles.Toolbarbutton.CenterText());
 
             //GUILayout.EndArea();
 
-            if(openedBundle == null)
+            if (openedBundle == null)
             {
                 GUILayout.EndArea();
                 return;
             }
 
+            // Add Asset button
+            if (EditorGUI.DropdownButton(new Rect(apRect.width - sideBtnWidth, toolbarHeight, sideBtnWidth, toolbarHeight),
+                    EditorGUIUtility.TrIconContent("d_Toolbar Plus", "Add Asset"), FocusType.Passive, FullEditorStyles.Toolbarbutton))
+            {
+                openedBundle.entries.Add(new Bundle.Entry());
+            }
 
             var startY = toolbarHeight * 2f;
             for (int i = 0; i < openedBundle.entries.Count; i++)
             {
                 var entry = openedBundle.entries[i];
-                entry.address = EditorGUI.DelayedTextField(new Rect(0f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), entry.address).ToLower();
+                
+                var oldCol = GUI.color;
 
-                EditorGUI.SelectableLabel(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), entry.assetPath);
-                //EditorGUI.ObjectField(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), new UnityEngine.Object(), typeof(UnityEngine.Object), false);
+                if (string.IsNullOrWhiteSpace(entry.address))
+                {
+                    GUI.color = Color.yellow;
+                    entry.address = "";
+                }
+
+                entry.address = EditorGUI.TextField(new Rect(0f, startY + (toolbarHeight * i), apRect.width / 2f, toolbarHeight), 
+                    entry.address).ToLower().Trim();
+
+                GUI.color = oldCol;
+
+                string assetPath = entry.GetAssetPath();
+                if (string.IsNullOrEmpty(assetPath))
+                {
+                    assetPath = "No Asset Path";
+                    GUI.color = Color.yellow;
+                }
+
+                //EditorGUI.PrefixLabel(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width * 0.2f, toolbarHeight), new GUIContent(entry.GetAssetPath()), FullEditorStyles.ObjectField);
+
+                EditorGUI.SelectableLabel(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width * 0.25f, toolbarHeight), assetPath);
+                entry.assetObject = EditorGUI.ObjectField(
+                    new Rect(apRect.width * 0.75f, startY + (toolbarHeight * i), apRect.width * 0.25f - sideBtnWidth, toolbarHeight), 
+                    entry.assetObject, typeof(UnityEngine.Object), false);
+
+                GUI.color = oldCol;
+
+                if(EditorGUI.DropdownButton(new Rect(apRect.width - sideBtnWidth, startY + (toolbarHeight * i), sideBtnWidth, toolbarHeight), 
+                    EditorGUIUtility.TrIconContent("d_Toolbar Minus", "Remove Asset"), FocusType.Passive, FullEditorStyles.Toolbarbutton))
+                {
+                    Undo.RecordObject(data, "Removed Asset Entry");
+                    openedBundle.entries.RemoveAt(i--);
+                }
             }
-
-
 
             GUILayout.EndArea();
         }
 
-        
+        private class CreateBundlePopup : PopupWindowContent
+        {
+            private string bundleName = "new.bundle";
+            private readonly AbundableData data;
+
+            public CreateBundlePopup(ref AbundableData data) : base()
+            {
+                this.data = data;
+            }
+
+            public override void OnGUI(Rect rect)
+            {
+                GUILayout.Label("New Bundle Name", FullEditorStyles.BoldLabel);
+                bundleName = EditorGUILayout.TextField(bundleName);
+
+                if(GUILayout.Button("Create Bundle"))
+                {
+                    data.bundles.Add(new Bundle(bundleName));
+                    editorWindow.Close();
+                }
+            }
+        }
     }
 }
