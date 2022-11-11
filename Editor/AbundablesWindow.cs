@@ -12,7 +12,8 @@ namespace Abundables
         private Bundle openedBundle;
         private static AbundableData data;
 
-        private const string dataPath = "Assets/Abundables/Editor/Data/AbundableData.asset";
+        private const string EDITOR_PATH = "Assets/Abundables/Editor";
+        private const string DATA_PATH = EDITOR_PATH + "/Data/AbundableData.asset";
 
         private float sideBtnWidth = 26f;
         private float toolbarHeight = 20f;
@@ -28,12 +29,13 @@ namespace Abundables
         {
             if(data == null)
             {
-                data = AssetDatabase.LoadAssetAtPath<AbundableData>(dataPath);
+                data = AssetDatabase.LoadAssetAtPath<AbundableData>(DATA_PATH);
 
                 if(data == null)
                 {
                     data = CreateInstance<AbundableData>();
-                    AssetDatabase.CreateAsset(data, dataPath);
+                    AssetDatabase.CreateFolder(EDITOR_PATH, "Data");
+                    AssetDatabase.CreateAsset(data, DATA_PATH);
                     AssetDatabase.Refresh();
                 }
             }
@@ -43,6 +45,7 @@ namespace Abundables
         public static void ShowWindow()
         {
             var window = GetWindow<AbundablesWindow>("Abundables!");
+            OnLoad();
             window.Show();
         }
 
@@ -152,7 +155,7 @@ namespace Abundables
 
                 var bStyle = FullEditorStyles.Toolbarbutton.CenterText();
 
-                List<string> selectBtns = new() { "All", "None" };
+                var selectBtns = new List<string>() { "All", "None" };
                 var bRects = EditorGUIUtility.GetFlowLayoutedRects(new Rect(0f, 0f, bpRect.width / 2f, toolbarHeight), bStyle, 0f, 0f, selectBtns);
 
                 if(GUI.Button(bRects[0], new GUIContent(selectBtns[0], "Select all bundles for build"), bStyle))
