@@ -24,10 +24,7 @@ namespace Abundables
 
                 string[] paths = AssetDatabase.GetAssetPathsFromAssetBundle(bName);
 
-                var bundle = new Bundle(bName)
-                {
-                    entries = new List<Bundle.Entry>(paths.Length)
-                };
+                var bundle = new Bundle(bName, new List<Bundle.Entry>(paths.Length));
 
                 for (int i = 0; i < paths.Length; i++)
                 {
@@ -45,9 +42,10 @@ namespace Abundables
         public string name;
         public List<Entry> entries;
 
-        public Bundle(string name)
+        public Bundle(string name, List<Entry> entries = null)
         {
             this.name = name;
+            this.entries = entries == null ? new List<Entry>() : entries;
         }
 
         public string[] GetAllAssetPaths()

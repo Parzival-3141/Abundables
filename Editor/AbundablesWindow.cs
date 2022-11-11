@@ -55,11 +55,6 @@ namespace Abundables
             }
         }
 
-        public void GetSelectedBundles()
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         private void OnGUI()
@@ -229,6 +224,7 @@ namespace Abundables
             if (openedBundle == null)
             {
                 GUILayout.EndArea();
+                EditorUtility.SetDirty(this);
                 return;
             }
 
@@ -257,11 +253,17 @@ namespace Abundables
 
                 GUI.color = oldCol;
 
-                string assetPath = entry.GetAssetPath();
-                if (string.IsNullOrEmpty(assetPath))
+                string assetPath;
+                bool assetWasNull = true;
+                if (entry.assetObject == null)
                 {
                     assetPath = "No Asset Path";
                     GUI.color = Color.yellow;
+                }
+                else
+                {
+                    assetPath = entry.GetAssetPath();
+                    assetWasNull = false;
                 }
 
                 //EditorGUI.PrefixLabel(new Rect(apRect.width / 2f, startY + (toolbarHeight * i), apRect.width * 0.2f, toolbarHeight), new GUIContent(entry.GetAssetPath()), FullEditorStyles.ObjectField);
@@ -272,6 +274,11 @@ namespace Abundables
                     entry.assetObject, typeof(UnityEngine.Object), false);
 
                 GUI.color = oldCol;
+
+                if(string.IsNullOrWhiteSpace(entry.address) && assetWasNull && entry.assetObject != null)
+                {
+                    entry.address = entry.GetAssetPath();
+                }
 
                 if(EditorGUI.DropdownButton(new Rect(apRect.width - sideBtnWidth, startY + (toolbarHeight * i), sideBtnWidth, toolbarHeight), 
                     EditorGUIUtility.TrIconContent("d_Toolbar Minus", "Remove Asset"), FocusType.Passive, FullEditorStyles.Toolbarbutton))
