@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
+using System.IO;
 
 namespace Abundables
 {
@@ -12,8 +12,8 @@ namespace Abundables
         private Bundle openedBundle;
         private static AbundableData data;
 
-        private const string EDITOR_PATH = "Assets/Abundables/Editor";
-        private const string DATA_PATH = EDITOR_PATH + "/Data/AbundableData.asset";
+        private const string LOCAL_DATA_PATH = "Abundables/Data";
+        private const string DATA_FILENAME = "AbundableData.asset";
 
         private float sideBtnWidth = 26f;
         private float toolbarHeight = 20f;
@@ -29,15 +29,31 @@ namespace Abundables
         {
             if(data == null)
             {
-                data = AssetDatabase.LoadAssetAtPath<AbundableData>(DATA_PATH);
+                string dataFilePath = Path.Combine("Assets", LOCAL_DATA_PATH, DATA_FILENAME).Replace("\\", "/");
 
-                if(data == null)
+                if (File.Exists(Path.Combine(Application.dataPath, LOCAL_DATA_PATH, DATA_FILENAME)))
+                {
+                    data = AssetDatabase.LoadAssetAtPath<AbundableData>(dataFilePath);
+                }
+                else
                 {
                     data = CreateInstance<AbundableData>();
-                    AssetDatabase.CreateFolder(EDITOR_PATH, "Data");
-                    AssetDatabase.CreateAsset(data, DATA_PATH);
+                    Directory.CreateDirectory(Path.Combine(Application.dataPath, LOCAL_DATA_PATH));
+                    AssetDatabase.CreateAsset(data, dataFilePath);
                     AssetDatabase.Refresh();
                 }
+
+
+
+                //data = AssetDatabase.LoadAssetAtPath<AbundableData>(dataFilePath);
+
+                //if(data == null)
+                //{
+                //    data = CreateInstance<AbundableData>();
+                //    Directory.CreateDirectory(Path.Combine(Application.dataPath, LOCAL_DATA_PATH));
+                //    AssetDatabase.CreateAsset(data, dataFilePath);
+                //    AssetDatabase.Refresh();
+                //}
             }
         }
 
@@ -65,6 +81,7 @@ namespace Abundables
             DrawBundlesPanel();
             DrawAssetsPanel();
 
+            // Draw seperator lines
             EditorGUI.DrawRect(new Rect(position.width / 3f, 0f, 1f, position.height), lineColor);
             EditorGUI.DrawRect(new Rect((position.width / 3f) * 2f - 1f, toolbarHeight, 1f, position.height), lineColor);
             EditorGUI.DrawRect(new Rect(position.width / 3f, toolbarHeight, (position.width / 3f) * 2f, 1f), lineColor);
