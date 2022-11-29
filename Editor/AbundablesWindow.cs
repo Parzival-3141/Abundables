@@ -42,18 +42,6 @@ namespace Abundables
                     AssetDatabase.CreateAsset(data, dataFilePath);
                     AssetDatabase.Refresh();
                 }
-
-
-
-                //data = AssetDatabase.LoadAssetAtPath<AbundableData>(dataFilePath);
-
-                //if(data == null)
-                //{
-                //    data = CreateInstance<AbundableData>();
-                //    Directory.CreateDirectory(Path.Combine(Application.dataPath, LOCAL_DATA_PATH));
-                //    AssetDatabase.CreateAsset(data, dataFilePath);
-                //    AssetDatabase.Refresh();
-                //}
             }
         }
 
@@ -100,8 +88,6 @@ namespace Abundables
             {
                 PopupWindow.Show(createBundleRect, new CreateBundlePopup(ref data));
             }
-            //if (Event.current.type == EventType.Repaint) 
-            //    createBundleRect = GUILayoutUtility.GetLastRect();
 
             EditorGUI.LabelField(new Rect(sideBtnWidth, 0f, bpRect.width - sideBtnWidth, toolbarHeight), "Bundles", FullEditorStyles.Toolbarbutton.CenterText());
 
