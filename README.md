@@ -11,7 +11,9 @@ over your Bundles with just a few clicks.
 ## How does it work?
 
 Click the `Abundables/Open Editor` menu item to open the editor.
+
 ![Menu Item](../repo-media/Editor_Menubar.png)
+
 *(You can also import existing AssetBundles here!)*
 
 From there you can create/delete Bundles, add/remove Assets from Bundles, set Runtime Addresses, and
