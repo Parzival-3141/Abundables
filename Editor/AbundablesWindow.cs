@@ -229,24 +229,21 @@ namespace Abundables
 
         private void DrawAssetsPanel()
         {
+            if (openedBundle == null)
+            {
+                return;
+            }
+
             var apRect = new Rect(position.width / 3f, 0f, position.width - (position.width / 3f), position.height);
             GUILayout.BeginArea(apRect, FullEditorStyles.Toolbar);
 
-            EditorGUI.LabelField(new Rect(0f, 0f, apRect.width, toolbarHeight), "Assets", FullEditorStyles.Toolbarbutton.CenterText());
+            EditorGUI.LabelField(new Rect(0f, 0f, apRect.width, toolbarHeight), openedBundle.name + " Assets", FullEditorStyles.Toolbarbutton.CenterText());
 
             //GUILayout.BeginArea(new Rect(0f, toolbarHeight, apRect.width, toolbarHeight));
 
             EditorGUI.LabelField(new Rect(0f, toolbarHeight, apRect.width / 2f, toolbarHeight), "Address", FullEditorStyles.Toolbarbutton.CenterText());
             EditorGUI.LabelField(new Rect(apRect.width / 2f, toolbarHeight, apRect.width / 2f - sideBtnWidth, toolbarHeight), "Asset Path", FullEditorStyles.Toolbarbutton.CenterText());
 
-            //GUILayout.EndArea();
-
-            if (openedBundle == null)
-            {
-                GUILayout.EndArea();
-                EditorUtility.SetDirty(this);
-                return;
-            }
 
             // Add Asset button
             if (EditorGUI.DropdownButton(new Rect(apRect.width - sideBtnWidth, toolbarHeight, sideBtnWidth, toolbarHeight),
@@ -321,12 +318,25 @@ namespace Abundables
                 this.data = data;
             }
 
+            public override Vector2 GetWindowSize()
+            {
+                return new Vector2(170f, 70f);
+            }
+
             public override void OnGUI(Rect rect)
             {
                 GUILayout.Label("New Bundle Name", FullEditorStyles.BoldLabel);
-                bundleName = EditorGUILayout.TextField(bundleName);
+                bundleName = EditorGUILayout.TextField(bundleName).Trim();
 
-                if(GUILayout.Button("Create Bundle"))
+                if(string.IsNullOrWhiteSpace(bundleName) || bundleName.IndexOfAny(Path.GetInvalidFileNameChars()) > 0)
+                {
+                    GUILayout.Box("Invalid file name!", FullEditorStyles.CNStatusWarn.CenterText());
+                }
+                else if(data.bundles.Exists(b => b.name == bundleName))
+                {
+                    GUILayout.Box("That Bundle already exists!", FullEditorStyles.CNStatusWarn.CenterText());
+                }
+                else if(GUILayout.Button("Create Bundle"))
                 {
                     data.bundles.Add(new Bundle(bundleName));
                     editorWindow.Close();
